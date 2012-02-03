@@ -43,22 +43,22 @@ $status = Hash.new # FIXME
 # Dirty implementation, replace this by a nice rubbyish DSL
 #
 
-UceLongPoller.i.handlers["ev_stream_started"] = Proc.new do |event|
-  $status[event['location']] = Hash.new unless $status.has_key? event['location']
+# UceLongPoller.i.handlers["ev_stream_started"] = Proc.new do |event|
+#   $status[event['location']] = Hash.new unless $status.has_key? event['location']
 
-  $status[event['location']][event['metadata']['user_uid']] = event
-end
+#   $status[event['location']][event['metadata']['user_uid']] = event
+# end
 
-UceLongPoller.i.handlers["ev_stream_stopped"] = Proc.new do |event|
-  $status[event['location']].delete event['metadata']['user_uid']
-end
+# UceLongPoller.i.handlers["ev_stream_stopped"] = Proc.new do |event|
+#   $status[event['location']].delete event['metadata']['user_uid']
+# end
 
-UceLongPoller.i.handlers["event-as-status.list"] = Proc.new do |event|
-  return unless event.has_key? 'location'
+# UceLongPoller.i.handlers["event-as-status.list"] = Proc.new do |event|
+#   return unless event.has_key? 'location'
 
-  room = event['location']
-  UceEvent.i.event-as-status({:to => event['from'], :metadata => $status[room]}, room)
-end
+#   room = event['location']
+#   UceEvent.i.event-as-status({:to => event['from'], :metadata => $status[room]}, room)
+# end
 
 module StatusDSL
 Dir["status/*.rb"].each do |file|

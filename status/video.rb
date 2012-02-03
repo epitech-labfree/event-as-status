@@ -28,15 +28,14 @@ status :streams do |status|
   status.scope :meeting
   status.index :metadata, :user_uid
 
-  status.default nil
-
   status.event :ev_stream_started do |event, current_status|
-    puts "hello"
+    Conf.i.logger.debug "Status #{status.name}, ev_stream_started"
+    event
   end
 
   status.event :ev_stream_stopped do |event, current_status|
-    puts "hello"
+    Conf.i.logger.debug "Status #{status.name}, ev_stream_stopped"
+    nil
   end
-
 end
 
