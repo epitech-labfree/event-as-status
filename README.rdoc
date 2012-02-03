@@ -8,6 +8,8 @@ It reacts to user-defined event by creating and updating a status list, allowing
 
 It was developped to simply keep track of currently playing video streams inside a meeting, so a user joining the meeting could easily obtain, in a more reliable manner that a roster/list, the list of stream he should instantiate flash widget for.
 
+The differents status and related event it keeps track of are defined using a really simple DSL, of which there's an example below.
+
 # DSL Example
 
 ```ruby
