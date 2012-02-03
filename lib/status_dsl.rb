@@ -117,7 +117,7 @@ module StatusDSL
       type = event['type']
 
       begin
-        @status[_scope(event)][_index(event)] = @handlers[type].call event
+        @status[_scope(event)][_index(event)] = @handlers[type].call event, @status[_scope(event)][_index(event)]
       rescue
         Settings.i.logger.warn "Status update exception, maybe the scope doesn't exist ? (#{$!})"
       end
