@@ -1,0 +1,24 @@
+# event-as-status
+
+This project is a functional 'brick' for af83/ucengine fast and persistent pubsub server.
+
+# DSL Example
+
+
+ status :streams do |status|
+   status.description "keeps track of stream_started and stream_stopped"
+   status.scope :meeting
+   status.index :metadata, :user_uid
+
+   status.event :ev_stream_started do |event, current_status|
+     Conf.i.logger.debug "Status #{status.name}, ev_stream_started"
+     event
+   end
+
+   status.event :ev_stream_stopped do |event, current_status|
+     Conf.i.logger.debug "Status #{status.name}, ev_stream_stopped"
+     nil
+   end
+ end
+
+
