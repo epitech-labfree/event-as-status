@@ -1,6 +1,6 @@
 # event-as-status
 
-This project is a functional 'brick' for [af83/ucengine](https://github.com/af83/ucengineaf83/ucengine), a fast and persistent pubsub server.
+This project is a functional 'brick' for [af83/ucengine](https://github.com/af83/ucengine), a fast and persistent pubsub server.
 
 It's written in Ruby and uses Event Machine and em-http-request.
 
