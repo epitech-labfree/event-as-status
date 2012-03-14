@@ -33,12 +33,11 @@ require 'settings'
 require 'uce_event'
 require 'uce_login'
 require 'uce_longpoller'
+require 'uce_meeting'
 require 'status_dsl'
 
 $log = Conf.i.logger
 $log.warn "Starting 'event-as-status' brick"
-$status = Hash.new # FIXME
-
 #
 # Dirty implementation, replace this by a nice rubbyish DSL
 #
@@ -71,7 +70,12 @@ Dir["status/*.rb"].each do |file|
 end
 
 EM.run do
+  status_on_login_proc = Proc.new do |u, s|
+    StatusDSL.statuses.each { |name, st| st._on_login(u, s) }
+  end
+
   UceLogin.new(Proc.new { |uid, sid| puts "Connected with #{uid}, #{sid}"},
                Proc.new { |u, s| UceLongPoller.i.on_login(u, s) },
-               Proc.new { |u, s| UceEvent.i.on_login(u, s) })
+               Proc.new { |u, s| UceEvent.i.on_login(u, s) },
+               status_on_login_proc)
 end

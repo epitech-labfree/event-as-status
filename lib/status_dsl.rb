@@ -33,6 +33,8 @@
 #     - { :scope => 'scope-name', :index => 'scope-index', :value => { 'x' => 'y' }}
 #
 
+require 'settings'
+
 module StatusDSL
   @@_status = Hash.new
   @@_scopes = {
@@ -45,6 +47,10 @@ module StatusDSL
 
     yield @@_status[name]
     @@_status[name]._register
+  end
+
+  def self.statuses
+    @@_status
   end
 
   def self.scope(s)
@@ -74,7 +80,7 @@ module StatusDSL
     end
 
     def event(event_type, &block)
-      @handlers[event_type.to_s] = Proc.new block
+      @handlers[event_type.to_s] = Proc.new &block
     end
 
     def index(*args)
@@ -82,7 +88,7 @@ module StatusDSL
     end
 
     def _handler(event)
-      Settings.i.logger.notice "Got a event in of type #{event['type']} in #{name}"
+      Conf.i.logger.info "Got a event in of type #{event['type']} in #{name}"
 
       type = event['type']
 
@@ -118,16 +124,19 @@ module StatusDSL
 
       begin
         @status[_scope(event)][_index(event)] = @handlers[type].call event, @status[_scope(event)][_index(event)]
+
+        puts @status[_scope(event)]
       rescue
-        Settings.i.logger.warn "Status update exception, maybe the scope doesn't exist ? (#{$!})"
+        Conf.i.logger.warn "Status update exception, maybe the scope doesn't exist ? (#{$!})"
+        Conf.i.logger.debug "(#{$!.backtrace.join "\n"})"
       end
     end
 
     def _status_list(event)
       scope = event['metadata']['scope']
-      meta = {:scope => scope, :list => @scope[scope]}
+      meta = {:scope => scope, :list => @status[scope]}
 
-      UceEvent.i.event("#{basetype}.list", {:to => event['from'], :metadata => meta}, event['location'])
+      UceEvent.i.event("#{@basetype}.list.result", {:to => event['from'], :metadata => meta}, event['location'])
     end
 
     def _status_get(event)
@@ -136,7 +145,7 @@ module StatusDSL
       value = @status[scope][index]
       meta = {:scope => scope, :index => index, :value => value}
 
-      UceEvent.i.event("#{basetype}.get", {:to => event['from'], :metadata => meta}, event['location'])
+      UceEvent.i.event("#{@basetype}.get.result", {:to => event['from'], :metadata => meta}, event['location'])
     end
 
     def _status_set(event)
@@ -149,7 +158,8 @@ module StatusDSL
 
     def _index(event)
       tmp = event
-      @index.each { |i| tmp = tmp[i] }
+      @index.each { |i| tmp = tmp[i.to_s] }
+      tmp
     end
 
     def _scope(event)
@@ -167,6 +177,19 @@ module StatusDSL
         Conf.i.logger.info "Status #{@name} : Registering event #{t}"
         UceLongPoller.i.handlers[t] ||= Array.new
         UceLongPoller.i.handlers[t] << Proc.new { |e| _handler e }
+      end
+    end
+
+    def _on_login(u, s)
+      if @scope == :meeting
+        UceMeeting.list(u, s) do |meetings|
+          meetings.each do |m|
+            Conf.i.logger.info "Status #{@name}: register scope -> #{m["name"]}"
+            @status[m["name"]] = Hash.new unless @status.has_key? m["name"]
+          end
+
+          puts @status
+        end
       end
     end
 
