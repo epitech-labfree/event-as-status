@@ -29,3 +29,16 @@ status :streams do |status|
   end
 end
 ```
+
+# API Example
+
+This brick handle, for each 'status', 3 events. I will document here the format of the
+metadata of each event type :
+ * event-as-status.status.list
+   *{ :scope => 'scope-name' }
+ * event-as-status.status.get
+   * { :scope => 'scope-name', :index => 'scope-index' }
+ * event-as-status.status.set
+   * { :scope => 'scope-name', :index => 'scope-index', :value => { 'x' => 'y' }}
+
+
