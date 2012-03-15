@@ -30,7 +30,8 @@ status :streams do |status|
 
   status.event :ev_stream_started do |event, current_status|
     Conf.i.logger.debug "Status #{status.name}, ev_stream_started"
-    event
+    puts event["metadata"]["user_uid"]
+    event["metadata"]
   end
 
   status.event :ev_stream_stopped do |event, current_status|

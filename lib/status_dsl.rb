@@ -123,9 +123,13 @@ module StatusDSL
       type = event['type']
 
       begin
-        @status[_scope(event)][_index(event)] = @handlers[type].call event, @status[_scope(event)][_index(event)]
+        new_status = @handlers[type].call event, @status[_scope(event)][_index(event)]
+        if new_status
+          @status[_scope(event)][_index(event)] = new_status
+        else
+          @status[_scope(event)].delete _index(event) if @status[_scope(event)].has_key? _index(event)
 
-        puts @status[_scope(event)]
+        puts @status
       rescue
         Conf.i.logger.warn "Status update exception, maybe the scope doesn't exist ? (#{$!})"
         Conf.i.logger.debug "(#{$!.backtrace.join "\n"})"
@@ -135,6 +139,9 @@ module StatusDSL
     def _status_list(event)
       scope = event['metadata']['scope']
       meta = {:scope => scope, :list => @status[scope]}
+      puts "metadata =>"
+      puts meta
+
 
       UceEvent.i.event("#{@basetype}.list.result", {:to => event['from'], :metadata => meta}, event['location'])
     end

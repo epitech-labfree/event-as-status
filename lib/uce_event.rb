@@ -86,10 +86,9 @@ class UceEvent
   end
 
   def event(type, data, room = nil)
-    meta = data.flatten_for_query
-    query = @cred.merge({'type' => type}).merge(meta)
+    body = data.merge({:type => type}).merge(@cred).to_json
     @request = EM::HttpRequest.new(Conf.i.uce_url + '/event/' + room.to_s)
-    pipe = @request.post :query => query
+    pipe = @request.post :body => body, :head => {'content-type' => "application/json"}
     pipe.errback { on_error type, data }
     pipe.callback { on_response pipe, type, data }
   end
