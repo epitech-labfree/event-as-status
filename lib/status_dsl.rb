@@ -128,6 +128,7 @@ module StatusDSL
           @status[_scope(event)][_index(event)] = new_status
         else
           @status[_scope(event)].delete _index(event) if @status[_scope(event)].has_key? _index(event)
+        end
 
         puts @status
       rescue
